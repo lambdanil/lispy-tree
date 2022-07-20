@@ -53,6 +53,11 @@
         (vector-push-extend i found)))
     found))
 
+(defun vector-cat (vec1 vec2)
+  (adjust-array vec1 (+ (array-dimension vec1 0) (array-dimension vec2 0)))
+  (dotimes (n (array-dimension vec2 0))
+    (vector-push (aref vec2 n) vec1)))
+
 (defun get-all-children (tree node)
   (let ((found
           (get-occurences tree node))
@@ -61,23 +66,23 @@
         (i 0))
     (loop
       (when
-          (< i (array-dimension found 0))
+          (= i (1- (array-dimension found 0)))
         (return found))
       (setf nfound (get-occurences tree (aref found i)))
-      (vector-push-extend nfound found)
+      (vector-cat found nfound)
       (incf i))))
 
 (defun remove-node (tree node)
   (labels ((r-last-node (tree node)
              (delete-nth node (car tree))
              (delete-nth node (cdr tree))
-             (dotimes (i (- (array-dimension (car tree) 0) 2))
+             (dotimes (i (array-dimension (car tree) 0))
                (when (> (aref (car tree) i) node) (decf (aref (car tree) i))))))
     (let ((found
             (get-all-children tree node)))
       (loop
-        (when (zerop (array-dimension found 0)) (return t))
+        (when (zerop (array-dimension found 0)) (r-last-node tree node) (return t))
         (r-last-node tree (aref found (1- (array-dimension found 0))))
         (delete-nth (1- (array-dimension found 0)) found)
-        (dotimes (i (- (array-dimension found 0) 2))
+        (dotimes (i (array-dimension found 0))
           (when (> (aref found i) node) (decf (aref found i))))))))
