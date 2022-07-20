@@ -1,6 +1,10 @@
 (defmacro make-vector (type)
   `(make-array 0 :fill-pointer 0 :adjustable t :element-type ,type))
 
+(defun vector-push-resize (var vec)
+  (adjust-array vec (1+ (array-dimension vec 0)))
+  (vector-push var vec))
+
 (defun delete-nth (i seq)
   "Delete nth element from sequence."
   (let ((slide (subseq seq (1+ i)))
@@ -13,13 +17,13 @@
                     (relations (make-vector 'integer))
                     (names (make-vector 'string)))
   (when (zerop (array-dimension relations 0))
-    (vector-push-extend -1 relations)
-    (vector-push-extend nil names))
+    (vector-push-resize -1 relations)
+    (vector-push-resize nil names))
   (cons relations names))
 
 (defun new-node (tree parent)
-  (vector-push-extend parent (car tree))
-  (vector-push-extend nil (cdr tree))
+  (vector-push-resize parent (car tree))
+  (vector-push-resize nil (cdr tree))
   (1- (array-dimension (car tree) 0)))
 
 (defmacro ref-parent (tree node)
@@ -34,9 +38,9 @@
     (loop
       (when
           (= node -1)
-        (vector-push-extend node path)
+        (vector-push-resize node path)
         (return path))
-      (vector-push-extend node path)
+      (vector-push-resize node path)
       (setq node (ref-parent tree node)))))
 
 (defun path-from-root (tree node)
@@ -50,7 +54,7 @@
           (make-vector 'integer)))
     (dotimes (i (array-dimension (car tree) 0))
       (when (= (ref-parent tree i) node)
-        (vector-push-extend i found)))
+        (vector-push-resize i found)))
     found))
 
 (defun vector-cat (vec1 vec2)
