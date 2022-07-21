@@ -1,5 +1,7 @@
-(defmacro make-vector (type)
-  `(make-array 0 :fill-pointer 0 :adjustable t :element-type ,type))
+(defmacro make-vector (&aux type)
+  (if type
+    `(make-array 0 :fill-pointer 0 :adjustable t :element-type ,type)
+    `(make-array 0 :fill-pointer 0 :adjustable t)))
 
 (defun vector-push-resize (var vec)
   (adjust-array vec (1+ (array-dimension vec 0)))
@@ -47,7 +49,7 @@
   (reverse (path-from-root tree node)))
 
 (defun in-range (tree n)
-  (if (and (< n (1- (array-dimension (car tree) 0))) (>= n 0)) t nil))
+  (and (< n (1- (array-dimension (car tree) 0))) (>= n 0)))
 
 (defun get-occurences (tree node)
   (let ((found
