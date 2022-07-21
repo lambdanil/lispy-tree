@@ -46,7 +46,7 @@
       (setq node (ref-parent tree node)))))
 
 (defun path-from-root (tree node)
-  (reverse (path-from-root tree node)))
+  (reverse (path-to-root tree node)))
 
 (defun in-range (tree n)
   (and (< n (1- (array-dimension (car tree) 0))) (>= n 0)))
